@@ -1,3 +1,4 @@
+# src/handler.py
 import awsgi
 from src.app import app
 
