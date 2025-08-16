@@ -34,6 +34,17 @@ jobs:
           mkdir -p package
           if [ -f requirements.txt ]; then pip install -r requirements.txt -t package; fi
           cp -r src package/
+          # sanity check: ensure awsgi is there
+          python - <<'PY'
+          import os
+          found = False
+          for root, _, files in os.walk('package'):
+              if os.path.basename(root) == 'awsgi' and '__init__.py' in files:
+                  print("FOUND awsgi at:", os.path.join(root, '__init__.py'))
+                  found = True
+          if not found:
+              print("WARNING: awsgi not found in build output")
+          PY
           cd package
           zip -r ../function.zip .
           cd ..

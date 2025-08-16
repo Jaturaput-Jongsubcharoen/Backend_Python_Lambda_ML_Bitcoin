@@ -1,20 +1,24 @@
 # src/handler.py
-import json
-import logging
-import awsgi  # Lambda HTTP adapter for Flask
-from src.app import app
+import json, logging
+import awsgi
+from src.app import app  # REQUIRED
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.INFO)
 
 def handler(event, context):
     try:
+        where = getattr(awsgi, "__file__", "<built-in>")
+        has_resp = hasattr(awsgi, "response")
+        logging.info(f"awsgi imported from: {where}; has response: {has_resp}")
         return awsgi.response(app, event, context)
     except Exception as e:
-        # Make errors visible instead of silent 502s
-        logger.exception("Unhandled error in Lambda handler")
+        logging.exception("Unhandled error in Lambda handler")
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": str(e)}),
+            "body": json.dumps({
+                "error": str(e),
+                "awsgi_file": getattr(awsgi, "__file__", None),
+                "has_response": hasattr(awsgi, "response"),
+            }),
         }
