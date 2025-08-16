@@ -12,6 +12,9 @@ CORS(app, resources={r"/*": {"origins": [
     os.getenv("FRONTEND_URL")
 ]}})
 
+@app.get("/health")
+def health():
+    return jsonify(ok=True, msg="backend is healthy")
 
 @app.route("/python")
 def home():
