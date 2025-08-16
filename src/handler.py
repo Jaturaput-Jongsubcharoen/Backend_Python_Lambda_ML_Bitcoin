@@ -6,7 +6,7 @@ from src.app import app
 logging.getLogger().setLevel(logging.INFO)
 
 def handler(event, context):
-    # optional: quick sanity log
+    # Optional debug to confirm we’re on Function URL / HTTP API v2 shape
     rc = event.get("requestContext", {})
     logging.info("event keys: %s | rc keys: %s", list(event.keys()), list(rc.keys()))
     return wsgi_response(app, event, context)
