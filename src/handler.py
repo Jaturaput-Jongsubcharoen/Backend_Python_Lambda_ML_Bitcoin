@@ -1,5 +1,5 @@
 # src/handler.py
-import awsgi
+import awsgi # type: ignore
 from src.app import app
 
 def handler(event, context):

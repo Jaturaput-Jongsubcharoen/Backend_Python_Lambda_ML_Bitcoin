@@ -5,10 +5,16 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/*": {"origins": [
-    os.getenv("FRONTEND_AMPLIFY_URL"), 
-    os.getenv("FRONTEND_URL")
-]}})
+
+origins = [os.environ.get("FRONTEND_AMPLIFY_URL"), os.environ.get("FRONTEND_URL")]
+origins = [o for o in origins if o]         # drop Nones
+CORS(app, resources={r"/*": {"origins": origins or "*"}})  # allow * if nothing set
+
+
+#CORS(app, resources={r"/*": {"origins": [
+#    os.getenv("FRONTEND_AMPLIFY_URL"), 
+#    os.getenv("FRONTEND_URL")
+#]}})
 
 @app.get("/health")
 def health():
