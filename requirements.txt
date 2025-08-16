@@ -1,3 +1,5 @@
 flask
+flask-cors
 mangum
 python-dotenv
+awsgi

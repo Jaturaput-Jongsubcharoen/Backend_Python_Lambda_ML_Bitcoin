@@ -1,4 +1,5 @@
-from mangum import Mangnum
+import awsgi
 from src.app import app
 
-handler = Mangum(app)
+def handler(event, context):
+    return awsgi.response(app, event, context)
