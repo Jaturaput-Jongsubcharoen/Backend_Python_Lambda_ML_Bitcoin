@@ -32,6 +32,6 @@ def home():
 #    return jsonify({"message": "Hello from Flask Python on Lambda!"})
 
 
-if __name__ == "__main__":  
-    port = int(os.getenv("PORT", 8000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+#if __name__ == "__main__":  
+#    port = int(os.getenv("PORT", 8000))
+#   app.run(host="0.0.0.0", port=port, debug=True)
