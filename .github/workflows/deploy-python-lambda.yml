@@ -1,0 +1,59 @@
+name: Deploy Python Lambda
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write      # required for OIDC
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: deploy-python-backend-114147526883
+  S3_KEY_PREFIX: backend-python           # keeps Python builds separate
+  LAMBDA_NAME: backend-python             # your Lambda function name
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build Lambda artifact (ZIP)
+        run: |
+          rm -rf package function.zip || true
+          python -m pip install --upgrade pip
+          mkdir -p package
+          if [ -f requirements.txt ]; then pip install -r requirements.txt -t package; fi
+          cp -r src package/
+          cd package
+          zip -r ../function.zip .
+          cd ..
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::114147526883:role/github-oidc-lambda-deploy-python
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload ZIP to S3
+        run: |
+          S3_KEY="${S3_KEY_PREFIX}/function-${{ github.sha }}.zip"
+          echo "S3_KEY=$S3_KEY" >> $GITHUB_ENV
+          aws s3 cp function.zip "s3://${S3_BUCKET}/${S3_KEY}"
+
+      - name: Update Lambda from S3
+        run: |
+          aws lambda update-function-code \
+            --function-name "${LAMBDA_NAME}" \
+            --s3-bucket "${S3_BUCKET}" \
+            --s3-key "${S3_KEY}" \
+            --publish
